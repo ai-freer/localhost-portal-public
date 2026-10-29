@@ -2,7 +2,7 @@
 
 ## 文件边界
 
-HTTP 边界：使用 `portal_server.py` 只提供明确列出的运行资源；新增脚本、样式或图片时需审查并同步白名单，不能改为开放整个目录。
+HTTP 边界：使用 `portal_server.py` 只提供明确列出的运行资源；本地栅格图可放在 assets/ 下（推荐 assets/card-media/），目录和文件名使用英文字母、数字、下划线或连字符；不提供目录列表、SVG 文件或符号链接。新增其他脚本、样式时需审查并同步白名单，不能改为开放整个目录。
 
 通用框架：`index.html`、`bootstrap.js`、`config.js`、`services.js`、`shares.js`、`visuals.js`。
 实例内容：`instance.json`、`services.json`、`shares.json`、`artwork.json`。
@@ -58,7 +58,7 @@ HTTP 边界：使用 `portal_server.py` 只提供明确列出的运行资源；�
 
 ## 可选 card-media.json
 
-通用渲染由 card-media.js/card-media.css 提供；映射和图片是实例内容，不在框架覆盖清单中。文件缺失或读取失败只影响图片，不阻止导航加载。原四份 JSON、已有存储键和收藏不需迁移。
+通用渲染由 card-media.js/card-media.css 提供；映射和图片是实例内容，不在框架覆盖清单中。card-media.json 缺失、为空或 JSON 损坏只影响图片，不阻止手动启动或自启动；它不参与必需配置完整性检查，前端继续回退到原 SVG/白卡。原四份 JSON、已有存储键和收藏不需迁移。
 
 ```json
 {

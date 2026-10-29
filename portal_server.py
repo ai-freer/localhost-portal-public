@@ -4,6 +4,7 @@ import argparse
 import http.server
 import json
 import os
+import re
 from pathlib import Path
 import stat
 from urllib.parse import unquote, urlsplit, urlparse
@@ -13,13 +14,44 @@ RUNTIME_FILES = ('index.html', 'bootstrap.js', 'config.js', 'services.js', 'shar
                  'visuals.js', 'card-media.js', 'card-media.css', 'card-media.json', 'instance.json', 'services.json', 'shares.json', 'artwork.json')
 
 
+OPTIONAL_FILES = {'card-media.json'}
+IMAGE_TYPES = {'.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
+               '.webp': 'image/webp', '.avif': 'image/avif'}
+
+
+def is_image_path(name):
+    # Match the client-side raster asset contract, rejecting dot/empty segments.
+    return re.fullmatch(r'assets/(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-]+\.(?:png|jpe?g|webp|avif)', name, re.I) is not None
+
+
 def read_runtime_file(root, name):
-    if name not in RUNTIME_FILES:
+    if name not in RUNTIME_FILES and not is_image_path(name):
         raise ValueError('不允许读取此文件')
-    # Reject symbolic links, including links to files inside the project.
-    if (root / name).is_symlink() or (root / name).resolve().parent != root.resolve():
-        raise ValueError('运行文件不允许符号链接')
-    with os.fdopen(os.open(root / name, os.O_RDONLY | getattr(os, 'O_NOFOLLOW', 0) | getattr(os, 'O_NONBLOCK', 0)), 'rb') as stream:
+    root = root.resolve()
+    parts = name.split('/')
+    target = root
+    for part in parts:
+        target = target / part
+        if target.is_symlink():
+            raise ValueError('运行文件和目录不允许符号链接')
+    if not target.resolve().is_relative_to(root):
+        raise ValueError('运行文件必须在项目目录内')
+    flags = os.O_RDONLY | getattr(os, 'O_NOFOLLOW', 0) | getattr(os, 'O_NONBLOCK', 0)
+    if os.open in os.supports_dir_fd and hasattr(os, 'O_NOFOLLOW'):
+        # Open each directory relative to its descriptor: a directory swapped for
+        # a symlink between validation and open must not escape the project.
+        directory = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        try:
+            for part in parts[:-1]:
+                child = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=directory)
+                os.close(directory)
+                directory = child
+            descriptor = os.open(parts[-1], flags, dir_fd=directory)
+        finally:
+            os.close(directory)
+    else:
+        descriptor = os.open(target, flags)
+    with os.fdopen(descriptor, 'rb') as stream:
         if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
             raise ValueError(f'{name} 不是普通文件')
         data = stream.read()
@@ -29,8 +61,8 @@ def read_runtime_file(root, name):
 
 
 def runtime_snapshot(root):
-    result = {name: read_runtime_file(root, name) for name in RUNTIME_FILES}
-    data = {name: json.loads(result[name]) for name in RUNTIME_FILES if name.endswith('.json')}
+    result = {name: read_runtime_file(root, name) for name in RUNTIME_FILES if name not in OPTIONAL_FILES}
+    data = {name: json.loads(result[name]) for name in result if name.endswith('.json')}
     site, services, shares, artwork = (data[n] for n in ('instance.json', 'services.json', 'shares.json', 'artwork.json'))
     if not all(isinstance(value, dict) for value in data.values()):
         raise ValueError('配置文件的顶层必须是对象')
@@ -84,14 +116,14 @@ def make_server(root, port):
             try:
                 path = unquote(urlsplit(self.path).path, errors='strict')
                 name = 'index.html' if path == '/' else path[1:] if path.startswith('/') else ''
-                if name not in RUNTIME_FILES:
+                if name not in RUNTIME_FILES and not is_image_path(name):
                     self.send_error(404); return
                 body = read_runtime_file(root, name)
             except (OSError, ValueError, UnicodeError):
                 self.send_error(404); return
             mime = 'text/html' if name.endswith('.html') else 'text/javascript' if name.endswith('.js') else 'text/css' if name.endswith('.css') else 'application/json'
             self.send_response(200)
-            self.send_header('Content-Type', mime + '; charset=utf-8')
+            self.send_header('Content-Type', IMAGE_TYPES.get(Path(name).suffix.lower(), mime + '; charset=utf-8'))
             self.send_header('Content-Length', str(len(body)))
             self.send_header('Cache-Control', 'no-store')
             self.send_header('X-Content-Type-Options', 'nosniff')
