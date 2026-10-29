@@ -22,7 +22,9 @@
         if (!tags.has(el.localName) || [...el.attributes].some(a=>!attrs.has(a.name) || /url\s*\(/i.test(a.value))) throw new Error('配图只能包含本地静态线稿');
       }
     }
-    window.PortalInstance = {site, services, shares, artwork};
+    let cardMedia = {};
+    try { cardMedia = await json('card-media.json'); } catch { /* Optional imagery must never prevent navigation. */ }
+    window.PortalInstance = {site, services, shares, artwork, cardMedia};
     document.title = site.title || '服务导航';
     const brand = document.querySelector('.brand');
     brand.lastChild.textContent = ' ' + (site.brand || '导航');
@@ -33,9 +35,9 @@
     document.querySelector('.workspace .subtitle').textContent = site.servicesSubtitle || '';
     document.querySelector('#quick-url').textContent = new URL('./', location.href).href + '?q=%s';
     document.querySelector('#quick-example').textContent = site.quickExample || '示例';
-    for (const src of ['visuals.js','services.js','shares.js']) {
+    for (const src of ['card-media.js','visuals.js','services.js','shares.js']) {
       await new Promise((resolve,reject)=>{
-        const script = document.createElement('script'); script.src=src;
+        const script = document.createElement('script'); script.src=src+'?v=0.2.0-card-media';
         script.onload=resolve; script.onerror=()=>reject(new Error(`无法加载 ${src}`));
         document.body.append(script);
       });

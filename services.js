@@ -46,6 +46,7 @@ function render(){
     card.querySelector('.service-link').onclick = ()=>openUrl(s);
     card.querySelector('[data-act="edit"]').onclick = ()=>openEditor(s);
     card.querySelector('[data-act="del"]').onclick = ()=>del(s);
+    PortalCardMedia.attach(card,s,'services');
     grid.appendChild(card);
     probe(s, card.querySelector('.status'));
   }

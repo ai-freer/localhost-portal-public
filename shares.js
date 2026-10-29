@@ -85,6 +85,7 @@
         try { commit({...config, shares:config.shares.filter(item => item.id !== s.id)}); renderShares(); toast('已删除链接'); }
         catch (error) { toast(error.message); }
       };
+      PortalCardMedia.attach(card,s,'shares');
       grid.append(card);
     }
   }
@@ -182,6 +183,7 @@
         const card = document.createElement('article'); card.className = 'card unified-card';
         card.innerHTML = `<div class="share-top"><span class="share-meta">${esc(item.category)}</span>${kind==='share'?PortalVisuals.artwork(item):''}</div><h3>${esc(item.name)}</h3><p class="share-original">${esc(kind==='share' ? item.originalName : item.note)}</p><button class="unified-open">${item.nonWeb ? '复制连接串' : '打开'}</button>`;
         card.querySelector('button').onclick = ()=>{cancelUnified();openUrl(item);};
+        PortalCardMedia.attach(card,item,kind==='share'?'shares':'services');
         group.querySelector('.grid').append(card);
       }
       results.append(group);

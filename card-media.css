@@ -1,0 +1,13 @@
+/* Shared rendering; asset selection and crop coordinates belong to each instance. */
+:root{--card-panel-rgb:255,255,255}
+@media(prefers-color-scheme:dark){:root{--card-panel-rgb:32,39,51}}
+.card.has-card-media{isolation:isolate}
+.card-media-layer{position:absolute;inset:0;z-index:-2;overflow:hidden;border-radius:inherit;pointer-events:none}
+.card-media-image{position:absolute;right:0;top:0;width:69%;height:100%;object-fit:cover;opacity:.94;mask-image:linear-gradient(90deg,transparent,#000 28%)}
+.card-media-veil{position:absolute;inset:0;background:linear-gradient(90deg,rgba(var(--card-panel-rgb),1) 0%,rgba(var(--card-panel-rgb),.97) 27%,rgba(var(--card-panel-rgb),.76) 43%,rgba(var(--card-panel-rgb),.12) 66%,rgba(var(--card-panel-rgb),.04) 78%),linear-gradient(0deg,rgba(var(--card-panel-rgb),1) 0%,rgba(var(--card-panel-rgb),.95) 19%,rgba(var(--card-panel-rgb),.18) 38%,transparent 57%)}
+.has-card-media .share-illustration{visibility:hidden}
+.has-card-media h3,.has-card-media .name{width:fit-content;max-width:100%;background:rgba(var(--card-panel-rgb),.7);box-shadow:0 0 7px 4px rgba(var(--card-panel-rgb),.7);border-radius:3px}
+.has-card-media .share-original,.has-card-media .note{width:fit-content;max-width:100%;background:rgba(var(--card-panel-rgb),.56);box-shadow:0 0 6px 3px rgba(var(--card-panel-rgb),.56)}
+.has-card-media .connection,.has-card-media .share-meta{background:rgba(var(--card-panel-rgb),.85);border-radius:4px}
+.native-card-crop .card-media-image{opacity:1;mask-image:linear-gradient(90deg,transparent,#000 18%)}
+.native-card-crop .card-media-veil{background:linear-gradient(90deg,rgba(var(--card-panel-rgb),1) 0%,rgba(var(--card-panel-rgb),.98) 25%,rgba(var(--card-panel-rgb),.74) 42%,rgba(var(--card-panel-rgb),.08) 62%,rgba(var(--card-panel-rgb),.02) 78%),linear-gradient(0deg,rgba(var(--card-panel-rgb),1) 0%,rgba(var(--card-panel-rgb),.95) 18%,rgba(var(--card-panel-rgb),.08) 32%,transparent 46%)}

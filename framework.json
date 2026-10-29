@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0-candidate",
+  "version": "0.2.0-card-media",
   "files": [
     "index.html",
     "bootstrap.js",
@@ -16,6 +16,13 @@
     "uninstall-autostart.sh",
     "autostart.py",
     "autostart.test.py",
-    "AUTOSTART.md"
+    "AUTOSTART.md",
+    "portal_server.py",
+    "server.test.py",
+    "git-privacy.cjs",
+    "git-privacy.test.cjs",
+    "card-media.js",
+    "card-media.css",
+    "card-media.test.cjs"
   ]
 }

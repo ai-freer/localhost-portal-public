@@ -6,10 +6,14 @@ import os
 from pathlib import Path
 import plistlib
 import socket
+import xml.etree.ElementTree as ET
 import subprocess
 import sys
 import time
 import urllib.request
+import urllib.error
+sys.dont_write_bytecode = True
+from portal_server import runtime_snapshot
 
 
 def identity(root):
@@ -31,7 +35,7 @@ def configuration(root, port, python, home):
     logs = home / 'Library' / 'Logs' / 'PersonalPortal' / label
     return {
         'Label': label,
-        'ProgramArguments': [str(python), '-m', 'http.server', str(port), '--bind', '127.0.0.1', '--directory', str(root)],
+        'ProgramArguments': [str(python), '-B', str(root / 'portal_server.py'), '--port', str(port), '--bind', '127.0.0.1', '--directory', str(root)],
         'RunAtLoad': True,
         'KeepAlive': True,
         'ThrottleInterval': 5,
@@ -57,10 +61,22 @@ def free_port(port):
             raise RuntimeError(f'端口 {port} 不可用；请选择其他 --port，不会停止占用它的服务') from exc
 
 
+def verify_http(opener, root, port, expected):
+    for name, content in expected.items():
+        with opener.open(f'http://127.0.0.1:{port}/{name}', timeout=1) as response:
+            if response.read() != content:
+                raise RuntimeError(f'HTTP 内容不一致：{name}')
+    for name in ('.git/HEAD', '.git/config', 'README.md', 'autostart.py'):
+        try:
+            with opener.open(f'http://127.0.0.1:{port}/{name}', timeout=1):
+                raise RuntimeError('HTTP 未隔离非运行文件')
+        except urllib.error.HTTPError as error:
+            if error.code != 404:
+                raise RuntimeError('HTTP 隔离检查返回异常状态') from error
+
+
 def install(root, port, dry_run):
-    for name in ('index.html', 'instance.json', 'services.json', 'shares.json', 'artwork.json'):
-        if not (root / name).is_file():
-            raise RuntimeError(f'项目缺少 {name}')
+    expected = runtime_snapshot(root)
     # Resolve the interpreter now: launchd does not inherit the interactive shell PATH.
     python = Path(sys.executable).resolve()
     config = configuration(root, port, python, Path.home())
@@ -83,16 +99,14 @@ def install(root, port, dry_run):
         result = launchctl('bootstrap', f'gui/{os.getuid()}', str(dest))
         if result.returncode:
             raise RuntimeError('加载自启动失败：' + result.stderr.strip())
-        expected = (root / 'index.html').read_bytes()
         opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
         for _ in range(40):
             state = launchctl('print', target)
             if state.returncode == 0 and 'state = running' in state.stdout:
                 try:
-                    with opener.open(f'http://127.0.0.1:{port}/index.html', timeout=1) as response:
-                        if response.read() == expected:
-                            print(f'已安装并验证：http://127.0.0.1:{port}\n服务标识：{config["Label"]}\n配置：{dest}\n日志：{logs}')
-                            return
+                    verify_http(opener, root, port, expected)
+                    print(f'已安装；运行文件完整性与 HTTP 隔离检查通过：http://127.0.0.1:{port}\n服务标识：{config["Label"]}\n配置：{dest}\n日志：{logs}')
+                    return
                 except OSError:
                     pass
             time.sleep(0.25)
@@ -149,7 +163,7 @@ def main():
             install(root, args.port, args.dry_run)
         else:
             uninstall(root)
-    except (OSError, ValueError, RuntimeError, plistlib.InvalidFileException) as exc:
+    except (OSError, ValueError, RuntimeError, plistlib.InvalidFileException, ET.ParseError) as exc:
         print(f'失败：{exc}', file=sys.stderr)
         return 1
     return 0
