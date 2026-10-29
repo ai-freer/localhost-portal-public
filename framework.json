@@ -23,6 +23,7 @@
     "git-privacy.test.cjs",
     "card-media.js",
     "card-media.css",
-    "card-media.test.cjs"
+    "card-media.test.cjs",
+    "skills/portal-maintainer/references/card-visual-curation.md"
   ]
 }
