@@ -21,7 +21,33 @@ const PortalServicePresentation = (() => {
   function svg(kind,cls) {
     return `<svg class="${cls}" viewBox="0 0 96 76" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${drawings[kind]||drawings.connection}</svg>`;
   }
+  function brand(mapping,item) {
+    if(!mapping?.services || !own(mapping.services,item.url))return null;
+    const b=mapping.services[item.url]?.brand;
+    const safe=f=>typeof f==='string' && /^assets\/(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.(?:png|jpe?g|webp|avif)$/i.test(f);
+    if(!b || !safe(b.file))return null;
+    return {file:b.file,iconFile:safe(b.iconFile)?b.iconFile:b.file,surface:['light','dark'].includes(b.surface)?b.surface:'none',
+      attribution:typeof b.attribution==='string'?b.attribution.slice(0,300):''};
+  }
+  function attachBrand(card,item,mapping) {
+    const b=brand(mapping,item);if(!b)return;
+    const img=new Image();img.alt='';img.className='service-brand-image';
+    const layer=document.createElement('span');layer.className='service-brand-art brand-surface-'+b.surface;layer.setAttribute('aria-hidden','true');layer.append(img);
+    img.onload=()=>{if(!card.contains(layer))card.prepend(layer);card.classList.add('has-service-brand');};
+    img.onerror=()=>{layer.remove();card.classList.remove('has-service-brand');};img.src=b.file;
+    const emoji=card.querySelector('.emoji');
+    if(emoji){const icon=new Image();icon.alt='';icon.className='service-brand-icon brand-surface-'+b.surface;icon.onload=()=>emoji.replaceChildren(icon);icon.src=b.iconFile;}
+    if(b.attribution)card.title=b.attribution;
+  }
+  function credits(mapping) {
+    const text=[...new Set(Object.keys(mapping?.services||{}).map(url=>brand(mapping,{url})?.attribution).filter(Boolean))].join(' ');
+    let node=document.querySelector('.service-brand-credits');
+    if(!text){node?.remove();return;}
+    if(!node){node=document.createElement('p');node.className='service-brand-credits';document.body.append(node);}
+    node.textContent=text;
+  }
   function decorate(card,item,mapping,copy) {
+    attachBrand(card,item,mapping);
     const v=resolve(mapping,item);if(!v)return;
     card.classList.add('endpoint-card','endpoint-'+v.kind);
     const art=document.createElement('span');art.className='endpoint-art';art.setAttribute('aria-hidden','true');art.innerHTML=svg(v.kind,'endpoint-drawing');card.prepend(art);
@@ -40,6 +66,6 @@ const PortalServicePresentation = (() => {
     const main=card.querySelector('.service-link');if(main){main.title=v.action+'：'+item.url;main.setAttribute('aria-label',item.name+'，'+v.label+'，'+v.action);}
     const unified=card.querySelector('.unified-open');if(unified)unified.textContent=v.action;
   }
-  return {resolve,decorate};
+  return {resolve,decorate,brand,credits};
 })();
 if(typeof module!=='undefined')module.exports=PortalServicePresentation;

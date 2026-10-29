@@ -87,3 +87,5 @@ HTTP 边界：使用 `portal_server.py` 只提供明确列出的运行资源；�
 非网页服务默认作为连接地址呈现，数据库与缓存协议采用对应 SVG 图形，点击复制原始连接串。HTTP API 需要在 card-media.json 的 services 完整 URL 映射中显式声明 `"service":{"role":"endpoint","kind":"model"}`，不按名称或端口猜测。kind 支持 model、database、cache、connection。此声明独立于图片字段；不需要 file，不改变原 services.json 或浏览器收藏。
 
 服务网格和全局搜索均使用“复制地址”操作；分享空间的相同 URL 仍按分享链接打开。普通 HTTP 网页无声明时保持原行为。监听端口只说明有进程监听，不能当作实际依赖或使用证明。
+
+服务条目还可在同一个映射中设置 `"brand":{"file":"assets/brands/example.png","iconFile":"assets/brands/example-icon.png","surface":"light"}`。file 为完整官方标识，iconFile 为可选官方小图标；surface 为 light、dark 或 none。只接受本地静态栅格图片，以 contain 保持比例与原色，不作为整页截图裁切。来源与许可说明留在实例素材记录；brand.attribution 可存需要在页面底部显示的权利归属说明（最多 300 字符）。品牌展示不会把普通网页改成连接服务；连接动作仍由 service.role 或 nonWeb 决定。

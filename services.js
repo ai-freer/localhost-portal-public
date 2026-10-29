@@ -27,6 +27,7 @@ function match(service, q){
 
 function inCategory(s, c){ return c==='全部' || s.category===c || (PortalInstance.site.serviceCategories[c]?.includeTunnel && s.tunnel); }
 function render(){
+  PortalServicePresentation.credits(PortalInstance.cardMedia);
   const q = filter.trim();
   const list = services.filter(s=>inCategory(s, category) && match(s,q));
   renderChips();

@@ -16,3 +16,12 @@ test('invalid or prototype-derived metadata never inserts arbitrary labels or dr
  assert.equal(P.resolve({services:Object.create({[item.url]:{service:{role:'endpoint',kind:'model'}}})},item),null);
  for(const kind of ['__proto__','constructor','<script>'])assert.equal(P.resolve({services:{[item.url]:{service:{role:'endpoint',kind}}}},item).kind,'connection');
 });
+
+test('brand assets are local raster images and cannot alter endpoint actions',()=>{
+ const item={url:'https://example.com/tool'};
+ const map={services:{[item.url]:{brand:{file:'assets/brands/example.png',surface:'light',attribution:'Example mark'}}}};
+ assert.equal(P.brand(map,item).file,'assets/brands/example.png');assert.equal(P.resolve(map,item),null);
+ for(const file of ['https://example.com/a.png','assets/../private.png','assets/evil.svg','assets//a.png']){
+  map.services[item.url].brand.file=file;assert.equal(P.brand(map,item),null);
+ }
+});

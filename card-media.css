@@ -22,3 +22,15 @@
 .endpoint-card .port small{font-size:10px}.endpoint-card .connection{background:var(--panel);border-radius:4px}
 .endpoint-card.unified-card .endpoint-label{margin-top:4px}.endpoint-card.unified-card .share-original{max-width:85%}
 @media(prefers-color-scheme:dark){.endpoint-card{--endpoint-rgb:105,168,197}.endpoint-model{--endpoint-rgb:169,145,208}.endpoint-cache{--endpoint-rgb:216,147,131}.endpoint-art{opacity:.52}}
+
+/* Official brand assets stay intact: contain, original colors, no screenshot mask. */
+.has-service-brand{isolation:isolate}
+.service-brand-art{position:absolute;right:14px;top:34px;width:112px;height:92px;padding:7px;z-index:-1;pointer-events:none;border-radius:12px;display:flex;align-items:center;justify-content:center}
+.service-brand-image{width:100%;height:100%;object-fit:contain;opacity:1}
+.brand-surface-light{background:#fff}.brand-surface-dark{background:#171717}
+.service-brand-icon{width:25px;height:25px;object-fit:contain;border-radius:5px;padding:2px}
+.has-service-brand .endpoint-art{visibility:hidden}
+.has-service-brand .name,.has-service-brand h3{max-width:calc(100% - 105px)}
+.has-service-brand .note,.has-service-brand .share-original{max-width:calc(100% - 110px);min-height:34px}
+.service-brand-credits{margin:12px 32px 20px;color:var(--muted);font-size:10px;line-height:1.5;text-align:right}
+@media(max-width:460px){.service-brand-art{width:120px;height:92px}.has-service-brand .name,.has-service-brand h3{max-width:calc(100% - 120px)}}

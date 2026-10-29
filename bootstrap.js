@@ -37,7 +37,7 @@
     document.querySelector('#quick-example').textContent = site.quickExample || '示例';
     for (const src of ['card-media.js','service-presentation.js','visuals.js','services.js','shares.js']) {
       await new Promise((resolve,reject)=>{
-        const script = document.createElement('script'); script.src=src+'?v=0.3.1-service-purpose';
+        const script = document.createElement('script'); script.src=src+'?v=0.3.2-service-brands';
         script.onload=resolve; script.onerror=()=>reject(new Error(`无法加载 ${src}`));
         document.body.append(script);
       });
