@@ -46,6 +46,7 @@ function render(){
     card.querySelector('.service-link').onclick = ()=>openUrl(s);
     card.querySelector('[data-act="edit"]').onclick = ()=>openEditor(s);
     card.querySelector('[data-act="del"]').onclick = ()=>del(s);
+    PortalServicePresentation.decorate(card,s,PortalInstance.cardMedia,()=>openUrl(s));
     PortalCardMedia.attach(card,s,'services');
     grid.appendChild(card);
     probe(s, card.querySelector('.status'));
@@ -54,9 +55,10 @@ function render(){
 
 function ql(){ return filter.trim().toLowerCase(); }
 
-function openUrl(s){
-  if(s.nonWeb){
-    navigator.clipboard.writeText(s.url).then(()=>toast('已复制连接串：'+s.url), ()=>toast('连接串：'+s.url));
+function isAddressService(s){return !!PortalServicePresentation.resolve(PortalInstance.cardMedia,s);}
+function openUrl(s,space='services'){
+  if(s.nonWeb || space==='services' && isAddressService(s)){
+    navigator.clipboard.writeText(s.url).then(()=>toast('已复制地址：'+s.url), ()=>toast('地址：'+s.url));
     return;
   }
   // 非 http/https 直接 location 跳转（浏览器会询问）

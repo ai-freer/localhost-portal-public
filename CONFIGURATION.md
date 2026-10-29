@@ -81,3 +81,9 @@ HTTP 边界：使用 `portal_server.py` 只提供明确列出的运行资源；�
 键为原始完整 URL，保留查询和锚点，服务/分享分别匹配。crop 是原图像素的 x/y/width/height，sourceSize 是原图宽高；必须在图像边界内。未裁切时可用 focus（如 70% 40%）、fit（cover/contain）、brightness（0.5–1.5）。file 只接受 assets/ 下本地静态栅格图，禁止外链与路径上溯。level/type/source/reason 用于维护溯源，不显示业务状态。
 
 配图映射不写入 localStorage 或条目导出。完整实例备份除四份原配置外，还要包含 card-media.json 和 assets/card-media/。刷新配图不用重新导入收藏。测试：node --test config.test.cjs card-media.test.cjs。
+
+## 连接地址卡片
+
+非网页服务默认作为连接地址呈现，数据库与缓存协议采用对应 SVG 图形，点击复制原始连接串。HTTP API 需要在 card-media.json 的 services 完整 URL 映射中显式声明 `"service":{"role":"endpoint","kind":"model"}`，不按名称或端口猜测。kind 支持 model、database、cache、connection。此声明独立于图片字段；不需要 file，不改变原 services.json 或浏览器收藏。
+
+服务网格和全局搜索均使用“复制地址”操作；分享空间的相同 URL 仍按分享链接打开。普通 HTTP 网页无声明时保持原行为。监听端口只说明有进程监听，不能当作实际依赖或使用证明。

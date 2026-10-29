@@ -182,7 +182,8 @@
       for(const item of matches[kind]){
         const card = document.createElement('article'); card.className = 'card unified-card';
         card.innerHTML = `<div class="share-top"><span class="share-meta">${esc(item.category)}</span>${kind==='share'?PortalVisuals.artwork(item):''}</div><h3>${esc(item.name)}</h3><p class="share-original">${esc(kind==='share' ? item.originalName : item.note)}</p><button class="unified-open">${item.nonWeb ? '复制连接串' : '打开'}</button>`;
-        card.querySelector('button').onclick = ()=>{cancelUnified();openUrl(item);};
+        card.querySelector('button').onclick = ()=>{cancelUnified();openUrl(item,kind==='share'?'shares':'services');};
+        if(kind==='service')PortalServicePresentation.decorate(card,item,PortalInstance.cardMedia,()=>openUrl(item));
         PortalCardMedia.attach(card,item,kind==='share'?'shares':'services');
         group.querySelector('.grid').append(card);
       }
@@ -200,16 +201,16 @@
     const url = new URL(location.href); url.searchParams.delete('q'); url.searchParams.set('space','search'); history.replaceState(null,'',url);
     const all = [...matches.service,...matches.share];
     if(autoJump && all.length===1){
-      const target = all[0], q = value.trim().toLowerCase();
+      const target = all[0], targetSpace=matches.service.includes(target)?'services':'shares', q = value.trim().toLowerCase();
       const exact = [target.name,target.originalName || '',...(target.aliases||[])].some(t=>t.toLowerCase()===q);
       let seconds = exact ? 3 : 10;
       const hint = $s('#unified-hint');
       hint.innerHTML = `<span id="unified-countdown"></span><button id="unified-cancel">取消</button>`;
       const countdown = $s('#unified-countdown');
-      const update = ()=>{countdown.textContent = `${seconds} 秒后${target.nonWeb?'复制连接串':'打开'}「${target.name}」`;};
+      const update = ()=>{countdown.textContent = `${seconds} 秒后${targetSpace==='services' && isAddressService(target)?'复制地址':'打开'}「${target.name}」`;};
       update();
       $s('#unified-cancel').onclick = ()=>{cancelUnified();hint.textContent='已取消自动打开';};
-      unifiedTimer = setInterval(()=>{seconds--;if(seconds<=0){cancelUnified();openUrl(target);}else update();},1000);
+      unifiedTimer = setInterval(()=>{seconds--;if(seconds<=0){cancelUnified();openUrl(target,targetSpace);}else update();},1000);
     }
   }
   $s('#unified-input').oninput = ()=>showUnified($s('#unified-input').value, false);

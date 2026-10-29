@@ -11,7 +11,7 @@ from urllib.parse import unquote, urlsplit, urlparse
 import xml.etree.ElementTree as ET
 
 RUNTIME_FILES = ('index.html', 'bootstrap.js', 'config.js', 'services.js', 'shares.js',
-                 'visuals.js', 'card-media.js', 'card-media.css', 'card-media.json', 'instance.json', 'services.json', 'shares.json', 'artwork.json')
+                 'visuals.js', 'service-presentation.js', 'card-media.js', 'card-media.css', 'card-media.json', 'instance.json', 'services.json', 'shares.json', 'artwork.json')
 
 
 OPTIONAL_FILES = {'card-media.json'}
