@@ -1,6 +1,6 @@
 ---
 name: portal-maintainer
-description: 帮助用户启动和维护 Personal Portal 导航实例，包括配置服务与分享链接、分类、原生内容提取与三级卡片配图、浏览器配置导出合并，以及按明确请求管理 macOS 自启动。用于具有 instance.json、services.json、shares.json、artwork.json 的项目，不用于任意网站或服务器部署。
+description: 帮助用户启动和维护 Personal Portal 导航实例，包括 Chrome Site Search 地址栏搜索、配置服务与分享链接、分类、原生内容提取与三级卡片配图、浏览器配置导出合并，以及按明确请求管理 macOS 自启动。用于具有 instance.json、services.json、shares.json、artwork.json 的项目，不用于任意网站或服务器部署。
 ---
 
 # Personal Portal 使用与维护
@@ -17,6 +17,16 @@ description: 帮助用户启动和维护 Personal Portal 导航实例，包括�
 - 只有用户明确要求自启动时，才调用安装脚本。在 macOS 使用项目内 install-autostart.sh，可用 --port 指定端口；先检查端口冲突，不停止其他服务。普通启动不隐含安装常驻任务。
 - 卸载使用同目录 uninstall-autostart.sh。移动目录前先卸载原目录的任务；换端口先导出浏览器编辑。不要修改其他项目的 LaunchAgent、SSH 设置或系统服务。
 - 不直接以公网监听解决访问问题；本 Skill 不授予发布、推送、上传配置或安装目标应用的权限。非 macOS 不调用 macOS 安装器。
+
+## Chrome Site Search 地址栏入口
+
+用户询问“地址栏搜索”“go 快开”或首次使用方式时，读取目标 README 的“从 Chrome 地址栏直接搜索”章节。该功能通过浏览器站内搜索将关键词传入导航 `?q=`，搜索服务与分享条目，不抓取目标网站全文。
+
+- 先核对实例实际地址、端口和浏览器来源；提供 Name、Shortcut、URL 三项配置。默认快捷字可用 go，URL 使用实际实例地址加 `?q=%s`，必须保留 `%s`；不硬编码某台电脑的端口，也不替换用户日常使用的主机名。
+- 告知 Chrome 设置入口、`go → Tab → 关键词 → Enter` 的使用方式，以及唯一匹配时可取消的倒计时；连接地址条目执行复制操作，多结果不自动选择。
+- 说明本机服务必须运行；换电脑、端口或 Chrome 配置文件后需核对实例与收藏。添加 Site Search 不隐含安装自启动、迁移收藏或修改默认搜索引擎。
+- 只有用户要求代配置浏览器且具备相应能力时才操作 Chrome；不能编辑浏览器数据库或覆盖已有快捷字来强制配置。仅补文档不代表已配置浏览器。
+- 验证时区分直接打开带 `?q=` 的 URL 与真正从 Chrome 地址栏触发；没有实际操作 Chrome 时，不宣称 Site Search 配置验收通过。
 
 ## 添加、编辑和归类
 
