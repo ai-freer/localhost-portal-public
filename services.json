@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "services": [
+    {
+      "id": "workspace",
+      "name": "演示工作台",
+      "aliases": [
+        "demo workspace",
+        "workbench"
+      ],
+      "url": "https://example.com/workspace",
+      "category": "项目",
+      "emoji": "🧩",
+      "note": "虚构示例：替换为你自己的项目地址"
+    },
+    {
+      "id": "assistant",
+      "name": "演示助手",
+      "aliases": [
+        "demo assistant"
+      ],
+      "url": "https://example.com/assistant",
+      "category": "AI",
+      "emoji": "🤖",
+      "note": "虚构示例：你的 AI 工具入口"
+    },
+    {
+      "id": "dashboard",
+      "name": "演示仪表盘",
+      "aliases": [
+        "demo dashboard"
+      ],
+      "url": "https://example.com/dashboard",
+      "category": "工具",
+      "emoji": "📊",
+      "note": "虚构示例：常用数据看板"
+    },
+    {
+      "id": "remote",
+      "name": "远程服务示例",
+      "aliases": [
+        "remote demo"
+      ],
+      "url": "https://example.com/remote",
+      "category": "隧道",
+      "emoji": "🖥️",
+      "note": "虚构示例：展示隧道标记，不创建连接",
+      "tunnel": true
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "categories": [
+    "产品设计",
+    "项目计划",
+    "学习资料"
+  ],
+  "shares": [
+    {
+      "id": "product-outline",
+      "name": "产品概念说明",
+      "originalName": "Product Outline",
+      "url": "https://example.com/product-outline",
+      "category": "产品设计",
+      "date": "",
+      "aliases": [
+        "Product Outline"
+      ],
+      "artwork": "product-outline"
+    },
+    {
+      "id": "mobile-flow",
+      "name": "移动端交互流程",
+      "originalName": "Mobile Flow",
+      "url": "https://example.com/mobile-flow",
+      "category": "产品设计",
+      "date": "",
+      "aliases": [
+        "Mobile Flow"
+      ],
+      "artwork": "mobile-flow"
+    },
+    {
+      "id": "weekly-plan",
+      "name": "阶段工作计划",
+      "originalName": "Weekly Plan",
+      "url": "https://example.com/weekly-plan",
+      "category": "项目计划",
+      "date": "2026-01-12",
+      "aliases": [
+        "Weekly Plan"
+      ],
+      "artwork": "weekly-plan"
+    },
+    {
+      "id": "risk-review",
+      "name": "项目风险清单",
+      "originalName": "Risk Review",
+      "url": "https://example.com/risk-review",
+      "category": "项目计划",
+      "date": "2026-01-08",
+      "aliases": [
+        "Risk Review"
+      ],
+      "artwork": "risk-review"
+    },
+    {
+      "id": "reading-notes",
+      "name": "阅读方法笔记",
+      "originalName": "Reading Notes",
+      "url": "https://example.com/reading-notes",
+      "category": "学习资料",
+      "date": "",
+      "aliases": [
+        "Reading Notes"
+      ],
+      "artwork": "reading-notes"
+    },
+    {
+      "id": "science-notes",
+      "name": "科学学习手册",
+      "originalName": "Science Notes",
+      "url": "https://example.com/science-notes",
+      "category": "学习资料",
+      "date": "",
+      "aliases": [
+        "Science Notes"
+      ],
+      "artwork": "science-notes"
+    }
+  ]
+}

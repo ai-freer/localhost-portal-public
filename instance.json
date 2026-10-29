@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "title": "个人导航 · 示例",
+  "brand": "个人导航",
+  "sidebarNote": "服务与资料，从这里出发。",
+  "servicesTitle": "我的服务",
+  "servicesSubtitle": "搜索、分类，找到常用入口。",
+  "sharesSubtitle": "报告、计划与学习资料",
+  "quickExample": "演示工作台",
+  "storage": {
+    "services": "portal-demo:services:v1",
+    "shares": "portal-demo:shares:v1"
+  },
+  "serviceCategories": {
+    "AI": {
+      "icon": "chip"
+    },
+    "项目": {
+      "icon": "project"
+    },
+    "隧道": {
+      "icon": "tunnel",
+      "includeTunnel": true
+    },
+    "工具": {
+      "icon": "tool"
+    },
+    "数据库": {
+      "icon": "database"
+    },
+    "其他": {
+      "icon": "folder"
+    }
+  },
+  "shareCategories": {
+    "产品设计": {
+      "icon": "route",
+      "tone": "blue",
+      "sort": "manual"
+    },
+    "项目计划": {
+      "icon": "tracker",
+      "tone": "amber",
+      "sort": "date-desc"
+    },
+    "学习资料": {
+      "icon": "book",
+      "tone": "rose",
+      "sort": "manual"
+    }
+  },
+  "probeServices": false
+}

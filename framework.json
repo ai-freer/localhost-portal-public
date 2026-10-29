@@ -1,0 +1,21 @@
+{
+  "version": "0.1.0-candidate",
+  "files": [
+    "index.html",
+    "bootstrap.js",
+    "config.js",
+    "services.js",
+    "shares.js",
+    "visuals.js",
+    "config.test.cjs",
+    "CONFIGURATION.md",
+    "SHARE_CARD_STYLE.md",
+    "AGENTS.md",
+    "skills/portal-maintainer/SKILL.md",
+    "install-autostart.sh",
+    "uninstall-autostart.sh",
+    "autostart.py",
+    "autostart.test.py",
+    "AUTOSTART.md"
+  ]
+}

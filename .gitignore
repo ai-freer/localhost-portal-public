@@ -1,0 +1,11 @@
+.DS_Store
+.env
+.env.*
+*.pem
+*.key
+node_modules/
+__pycache__/
+*.log
+*.zip
+.remember/
+backups/
