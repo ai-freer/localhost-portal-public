@@ -40,8 +40,8 @@ const PortalCardMedia = (() => {
     visual.classList.add('card-media-image');visual.style.filter=`brightness(${v.brightness})`;
     const veil=document.createElement('span');veil.className='card-media-veil';layer.append(visual,veil);
     let tries=0;const probe=new Image();
-    const fail=()=>{card.classList.remove('has-card-media','native-card-crop');layer.remove();card.style.removeProperty('--card-media-text-width');};
-    const succeed=()=>{if(v.crop)visual.firstChild.setAttribute('href',probe.src);else visual.src=probe.src;if(!card.contains(layer))card.prepend(layer);card.classList.add('has-card-media');if(v.crop)card.classList.add('native-card-crop');};
+    const fail=()=>{card.classList.remove('has-card-media','native-card-crop','vivid-card-media');layer.remove();card.style.removeProperty('--card-media-text-width');};
+    const succeed=()=>{if(v.crop)visual.firstChild.setAttribute('href',probe.src);else visual.src=probe.src;if(!card.contains(layer))card.prepend(layer);card.classList.add('has-card-media');if(v.crop)card.classList.add('native-card-crop');if(v.vivid===true)card.classList.add('vivid-card-media');};
     // A failed refresh leaves the existing SVG/white card in place, without hiding content.
     probe.onload=succeed;probe.onerror=()=>{if(tries++===0)probe.src=v.file+'?retry=1';else fail();};
     (v.crop?visual.firstChild:visual).addEventListener('error',fail);

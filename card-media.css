@@ -36,3 +36,7 @@
 .has-service-brand .note,.has-service-brand .share-original{max-width:calc(100% - 110px);min-height:34px}
 .service-brand-credits{margin:12px 32px 20px;color:var(--muted);font-size:10px;line-height:1.5;text-align:right}
 @media(max-width:460px){.service-brand-art{width:120px;height:92px}.has-service-brand .name,.has-service-brand h3{max-width:calc(100% - 120px)}}
+
+/* High-exposure artwork keeps original color outside the text and action zones. */
+.vivid-card-media .card-media-image{opacity:1;mask-image:linear-gradient(90deg,transparent,#000 12%)}
+.vivid-card-media .card-media-veil{background:linear-gradient(90deg,rgba(var(--card-panel-rgb),1) 0%,rgba(var(--card-panel-rgb),.98) 30%,rgba(var(--card-panel-rgb),.8) 43%,rgba(var(--card-panel-rgb),.28) 58%,rgba(var(--card-panel-rgb),.03) 70%,transparent 85%),linear-gradient(0deg,rgba(var(--card-panel-rgb),1) 0%,rgba(var(--card-panel-rgb),.96) 16%,rgba(var(--card-panel-rgb),.08) 32%,transparent 46%)}
