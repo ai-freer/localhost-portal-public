@@ -4,7 +4,7 @@
 
 纯静态 HTML、CSS 和 JavaScript，无后端、无需安装前端依赖或构建。服务与分享分为两个空间，顶部统一搜索；卡片支持深浅主题、分类、编辑和配置导入导出。卡片支持本地原生截图与裁切，加载失败时保留 SVG 或白卡，不依赖远程图片服务。
 
-**当前状态：本地发布候选稿，尚未公开发布，采用 [MIT 许可证](LICENSE)。** 示例全部使用 example.com 虚构地址和虚构内容；打开示例链接不代表有对应的真实服务。
+**采用 [MIT 许可证](LICENSE)。** 源码仓库：[ai-freer/localhost-portal-public](https://github.com/ai-freer/localhost-portal-public)。 示例全部使用 example.com 虚构地址和虚构内容；打开示例链接不代表有对应的真实服务。
 
 ## 先运行起来
 
@@ -131,7 +131,7 @@ py -3 portal_server.py --port 7576
 在项目根目录运行（本次验证使用 Node.js 22、Python 3.13）：
 
 ```bash
-node --test config.test.cjs git-privacy.test.cjs card-media.test.cjs
+node --test config.test.cjs git-privacy.test.cjs card-media.test.cjs service-presentation.test.cjs
 python3 autostart.test.py
 python3 server.test.py
 node check-public.cjs --identity-file .git/approved-public-identities.json
@@ -143,7 +143,7 @@ node check-public.cjs --identity-file .git/approved-public-identities.json
 
 公开身份需要使用 GitHub 提供的 noreply 邮箱，并显式批准姓名与邮箱组合。把批准列表放在仓库外的 JSON 文件中，格式为 `[{"name":"公开署名","email":"GitHub 设置中提供的 noreply 邮箱"}]`，运行 `node check-public.cjs --identity-file /path/to/approved-identities.json`。未提供列表、历史身份不合规或下次提交身份不合规均返回失败；不要为消除提示而批准私人邮箱。
 
-检查不是完整秘密扫描器：不会扫描不可达对象、reflog 或截图像素，也不能识别所有私人域名和文本。通过后仍需人工审查待上传内容与许可证。当前本地候选稿已修正原有提交身份并完成审查，尚未推送或公开发布。身份批准文件仅保存在本机 .git/approved-public-identities.json，不进入提交；其他维护者需按上面的格式建立自己的批准列表。
+检查不是完整秘密扫描器：不会扫描不可达对象、reflog 或截图像素，也不能识别所有私人域名和文本。通过后仍需人工审查待上传内容与许可证。维护者发布前应使用已批准的公开身份列表运行检查。身份批准文件仅保存在本机 .git/approved-public-identities.json，不进入提交；其他维护者需按上面的格式建立自己的批准列表。
 
 视觉变化还应实际检查桌面 1440×1000、手机 390×844 的深浅主题。目录布局和详细绘图要求以项目文档为准。
 

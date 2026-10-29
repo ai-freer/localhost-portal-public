@@ -25,3 +25,7 @@ test('brand assets are local raster images and cannot alter endpoint actions',()
   map.services[item.url].brand.file=file;assert.equal(P.brand(map,item),null);
  }
 });
+
+test("dark brand variants accept only safe local assets",()=>{const url="http://localhost:1234"; const item={url}; const mapping={services:{[url]:{brand:{file:"assets/brand.png",darkFile:"assets/brand-dark.png"}}}};assert.equal(P.brand(mapping,item).darkFile,"assets/brand-dark.png");mapping.services[url].brand.darkFile="https://example.com/brand.png";assert.equal(P.brand(mapping,item).darkFile,null);});
+
+test("brand scale is bounded and cannot inject styling",()=>{const item={url:"http://localhost:1234"};const mapping={services:{[item.url]:{brand:{file:"assets/brand.png",scale:.68}}}};assert.equal(P.brand(mapping,item).scale,.68);mapping.services[item.url].brand.scale=99;assert.equal(P.brand(mapping,item).scale,1);mapping.services[item.url].brand.scale="url(bad)";assert.equal(P.brand(mapping,item).scale,1);});

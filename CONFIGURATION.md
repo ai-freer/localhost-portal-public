@@ -89,3 +89,9 @@ HTTP 边界：使用 `portal_server.py` 只提供明确列出的运行资源；�
 服务网格和全局搜索均使用“复制地址”操作；分享空间的相同 URL 仍按分享链接打开。普通 HTTP 网页无声明时保持原行为。监听端口只说明有进程监听，不能当作实际依赖或使用证明。
 
 服务条目还可在同一个映射中设置 `"brand":{"file":"assets/brands/example.png","iconFile":"assets/brands/example-icon.png","surface":"light"}`。file 为完整官方标识，iconFile 为可选官方小图标；surface 为 light、dark 或 none。只接受本地静态栅格图片，以 contain 保持比例与原色，不作为整页截图裁切。来源与许可说明留在实例素材记录；brand.attribution 可存需要在页面底部显示的权利归属说明（最多 300 字符）。品牌展示不会把普通网页改成连接服务；连接动作仍由 service.role 或 nonWeb 决定。
+
+官方标识的 `brand.darkFile` 可选，用于官方提供的深色背景版本；同样只接受实例本地栅格图片路径。透明标识通常用 `surface: "none"`，避免独立图片底板。
+
+`brand.scale` 可在 0.5–1 之间控制标识的视觉体量，默认 1；按标识实际轮廓和实心面积校准，不以图片外框尺寸一致代替视觉平衡。
+
+配图的 `textWidth` 可选（45–90，百分比），用于文字容易覆盖核心图表的卡片；仅调整该卡文字区域，不改变收藏内容。

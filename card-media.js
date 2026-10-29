@@ -6,6 +6,7 @@ const PortalCardMedia = (() => {
     // Only instance-local static raster assets; no remote requests or executable URLs.
     if (typeof entry.file !== 'string' || !/^assets\/[A-Za-z0-9_/-]+\.(?:png|jpe?g|webp|avif)$/i.test(entry.file) || entry.file.includes('..')) return null;
     const v = {...entry};
+    v.textWidth = Number.isFinite(v.textWidth) ? Math.max(45,Math.min(90,v.textWidth)) : null;
     if (v.crop !== undefined) {
       if (!Array.isArray(v.crop) || v.crop.length!==4 || !v.crop.every(Number.isFinite) || !Array.isArray(v.sourceSize) || v.sourceSize.length!==2 || !v.sourceSize.every(n=>Number.isFinite(n)&&n>0)) return null;
       const [x,y,w,h]=v.crop, [sw,sh]=v.sourceSize;
@@ -25,6 +26,7 @@ const PortalCardMedia = (() => {
   function attach(card,item,space) {
     const v=resolve(PortalInstance.cardMedia,space,item);
     if(!v) return;
+    if(v.textWidth)card.style.setProperty('--card-media-text-width',v.textWidth+'%');
     const layer=document.createElement('span');layer.className='card-media-layer';layer.setAttribute('aria-hidden','true');
     let visual;
     if(v.crop) {
@@ -38,7 +40,7 @@ const PortalCardMedia = (() => {
     visual.classList.add('card-media-image');visual.style.filter=`brightness(${v.brightness})`;
     const veil=document.createElement('span');veil.className='card-media-veil';layer.append(visual,veil);
     let tries=0;const probe=new Image();
-    const fail=()=>{card.classList.remove('has-card-media','native-card-crop');layer.remove();};
+    const fail=()=>{card.classList.remove('has-card-media','native-card-crop');layer.remove();card.style.removeProperty('--card-media-text-width');};
     const succeed=()=>{if(v.crop)visual.firstChild.setAttribute('href',probe.src);else visual.src=probe.src;if(!card.contains(layer))card.prepend(layer);card.classList.add('has-card-media');if(v.crop)card.classList.add('native-card-crop');};
     // A failed refresh leaves the existing SVG/white card in place, without hiding content.
     probe.onload=succeed;probe.onerror=()=>{if(tries++===0)probe.src=v.file+'?retry=1';else fail();};

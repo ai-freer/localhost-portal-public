@@ -26,13 +26,13 @@ const PortalServicePresentation = (() => {
     const b=mapping.services[item.url]?.brand;
     const safe=f=>typeof f==='string' && /^assets\/(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.(?:png|jpe?g|webp|avif)$/i.test(f);
     if(!b || !safe(b.file))return null;
-    return {file:b.file,iconFile:safe(b.iconFile)?b.iconFile:b.file,surface:['light','dark'].includes(b.surface)?b.surface:'none',
+    return {file:b.file,scale:Number.isFinite(b.scale)?Math.max(.5,Math.min(1,b.scale)):1,darkFile:safe(b.darkFile)?b.darkFile:null,iconFile:safe(b.iconFile)?b.iconFile:b.file,surface:['light','dark'].includes(b.surface)?b.surface:'none',
       attribution:typeof b.attribution==='string'?b.attribution.slice(0,300):''};
   }
   function attachBrand(card,item,mapping) {
     const b=brand(mapping,item);if(!b)return;
     const img=new Image();img.alt='';img.className='service-brand-image';
-    const layer=document.createElement('span');layer.className='service-brand-art brand-surface-'+b.surface;layer.setAttribute('aria-hidden','true');layer.append(img);
+    const layer=document.createElement('span');layer.className='service-brand-art brand-surface-'+b.surface;layer.setAttribute('aria-hidden','true');const picture=document.createElement('picture');if(b.darkFile){const source=document.createElement('source');source.media='(prefers-color-scheme: dark)';source.srcset=b.darkFile;picture.append(source);}picture.style.transform=`scale(${b.scale})`;picture.append(img);layer.append(picture);
     img.onload=()=>{if(!card.contains(layer))card.prepend(layer);card.classList.add('has-service-brand');};
     img.onerror=()=>{layer.remove();card.classList.remove('has-service-brand');};img.src=b.file;
     const emoji=card.querySelector('.emoji');
