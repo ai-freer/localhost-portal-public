@@ -6,7 +6,7 @@ const {auditGit,contentFindings,readIdentity}=require('./git-privacy.cjs');
 const args=process.argv.slice(2);
 if(args.length && (args.length!==2 || args[0]!=='--identity-file')) throw Error('用法：node check-public.cjs [--identity-file 已批准身份.json]');
 const framework=JSON.parse(fs.readFileSync('framework.json'));
-const allowed=new Set([...framework.files,'framework.json','instance.json','services.json','shares.json','artwork.json','card-media.json','README.md','LICENSE','.gitignore','check-public.cjs']);
+const allowed=new Set([...framework.files,'framework.json','instance.json','services.json','shares.json','artwork.json','card-media.json','README.md','README.zh-CN.md','LICENSE','.gitignore','check-public.cjs']);
 function walk(dir='.') {
  return fs.readdirSync(dir,{withFileTypes:true}).flatMap(e=>{
   if(e.name==='.git') return [];
