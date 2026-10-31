@@ -29,3 +29,14 @@ test('brand assets are local raster images and cannot alter endpoint actions',()
 test("dark brand variants accept only safe local assets",()=>{const url="http://localhost:1234"; const item={url}; const mapping={services:{[url]:{brand:{file:"assets/brand.png",darkFile:"assets/brand-dark.png"}}}};assert.equal(P.brand(mapping,item).darkFile,"assets/brand-dark.png");mapping.services[url].brand.darkFile="https://example.com/brand.png";assert.equal(P.brand(mapping,item).darkFile,null);});
 
 test("brand scale is bounded and cannot inject styling",()=>{const item={url:"http://localhost:1234"};const mapping={services:{[item.url]:{brand:{file:"assets/brand.png",scale:.68}}}};assert.equal(P.brand(mapping,item).scale,.68);mapping.services[item.url].brand.scale=99;assert.equal(P.brand(mapping,item).scale,1);mapping.services[item.url].brand.scale="url(bad)";assert.equal(P.brand(mapping,item).scale,1);});
+
+test('icon-only brand replaces the icon without adding a background logo',()=>{
+ const item={url:'https://example.com/tool'},mapping={services:{[item.url]:{brand:{file:'assets/brands/example.png',iconOnly:true}}}};
+ const previousImage=global.Image; const icons=[]; let prepends=0;
+ global.Image=class {set src(value){this.url=value;this.onload?.();}};
+ try {
+  const card={querySelector:s=>s==='.emoji'?{replaceChildren:node=>icons.push(node)}:null,prepend:()=>prepends++};
+  P.decorate(card,item,mapping,()=>{});
+  assert.equal(icons.length,1);assert.equal(icons[0].url,'assets/brands/example.png');assert.equal(prepends,0);
+ } finally {global.Image=previousImage;}
+});
