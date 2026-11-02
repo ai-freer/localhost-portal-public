@@ -4,6 +4,10 @@ const fs = require('node:fs');
 const C = require('./config.js');
 const service = {name:'测试',url:'https://example.com/service',category:'工具'};
 const share = {id:'reading',name:'阅读',url:'https://example.com/reading',category:'资料',artwork:'reading'};
+test('可选统一本机入口保留端口、路径、查询及锚点',()=>{
+ assert.equal(C.canonicalLoopback({canonicalLoopback:true},'http://localhost:7575/path?q=abc#part'),'http://127.0.0.1:7575/path?q=abc#part');
+ for (const [site,url] of [[{},'http://localhost:7575/'],[{canonicalLoopback:true},'http://127.0.0.1:7575/'],[{canonicalLoopback:true},'https://localhost:7575/'],[{canonicalLoopback:true},'http://example.com/']]) assert.equal(C.canonicalLoopback(site,url),null);
+});
 test('升级文件版本不覆盖浏览器编辑，加载不写存储',()=>{
  const saved = JSON.stringify({version:1,services:[{...service,name:'自定义标题'}]});
  const storage = {getItem:()=>saved,setItem:()=>assert.fail('不应写入')};

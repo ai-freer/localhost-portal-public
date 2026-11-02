@@ -9,6 +9,8 @@
     }
     const [site, services, shares, artwork] = await Promise.all(['instance.json','services.json','shares.json','artwork.json'].map(json));
     PortalConfig.instance(site); PortalConfig.services(services); PortalConfig.shares(shares);
+    const canonical = PortalConfig.canonicalLoopback(site, location.href);
+    if (canonical) { location.replace(canonical); return; }
     PortalConfig.loadSaved(localStorage, site.storage.services, services, PortalConfig.services);
     PortalConfig.loadSaved(localStorage, site.storage.shares, shares, PortalConfig.shares);
     // Only inert local SVG drawing elements are allowed in instance artwork.

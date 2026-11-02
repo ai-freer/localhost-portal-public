@@ -12,6 +12,8 @@ HTTP 边界：使用 `portal_server.py` 只提供明确列出的运行资源；�
 
 ## instance.json
 
+- `canonicalLoopback`：可选布尔值；为 `true` 时，HTTP 的 `localhost` 自动跳转到同端口的 `127.0.0.1`，保留路径、查询和锚点，两种入口使用同一个浏览器存储。启用前必须先导出并合并两个地址各自的浏览器配置；不自动迁移或删除旧存储。HTTPS 和其他主机不跳转；不同浏览器仍各自保存。
+
 - `schemaVersion`：目前为 1。
 - `title`、`brand`、`sidebarNote`、`servicesTitle`、`servicesSubtitle`、`sharesSubtitle`、`quickExample`：站点文案。
 - `storage.services`、`storage.shares`：两个独立的 localStorage 键。已有实例不要改键；新实例使用不同前缀。
