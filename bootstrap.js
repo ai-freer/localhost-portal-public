@@ -27,6 +27,30 @@
     let cardMedia = {};
     try { cardMedia = await json('card-media.json'); } catch { /* Optional imagery must never prevent navigation. */ }
     window.PortalInstance = {site, services, shares, artwork, cardMedia};
+    const stable = value => JSON.stringify(value, function(key, item) {
+      if (item && typeof item === 'object' && !Array.isArray(item)) return Object.fromEntries(Object.entries(item).sort(([a],[b])=>a.localeCompare(b)));
+      return item;
+    });
+    window.PortalFileStore = {
+      enabled: site.filePersistence === true,
+      async save(kind, before, next) {
+        if (!this.enabled) return;
+        const validate = kind === 'services' ? PortalConfig.services : PortalConfig.shares;
+        const response = await fetch(kind+'.json', {cache:'no-store'});
+        if (!response.ok || !response.headers.get('ETag')) throw new Error('本地保存服务不可用，未保存修改');
+        const current = validate(await response.json());
+        const baseline = validate(before);
+        if (kind === 'services') baseline.services = baseline.services.map(item=>{
+          const original=current.services.find(s=>s.url===item.url);
+          if (!original || original.id) return item;
+          const copy={...item}; delete copy.id; return copy;
+        });
+        if (stable(current) !== stable(baseline)) throw new Error('配置文件已被其他位置修改，请先核对并合并');
+        const result = await fetch(kind+'.json', {method:'PUT', headers:{'Content-Type':'application/json','X-Portal-Write':'1','If-Match':response.headers.get('ETag')},body:JSON.stringify(validate(next),null,2)+'\n'});
+        if (result.status === 409) throw new Error('配置文件刚被修改，请刷新并核对后重试');
+        if (!result.ok) throw new Error('写入本地配置失败，未保存修改');
+      }
+    };
     document.title = site.title || '服务导航';
     const brand = document.querySelector('.brand');
     brand.lastChild.textContent = ' ' + (site.brand || '导航');
@@ -39,7 +63,7 @@
     document.querySelector('#quick-example').textContent = site.quickExample || '示例';
     for (const src of ['card-media.js','service-presentation.js','visuals.js','services.js','shares.js']) {
       await new Promise((resolve,reject)=>{
-        const script = document.createElement('script'); script.src=src+'?v='+ (src==='service-presentation.js'?'0.3.3-card-visuals-icon1':(['services.js','shares.js'].includes(src)?'0.3.3-loopback2':'0.3.3-card-visuals'));
+        const script = document.createElement('script'); script.src=src+'?v='+ (src==='service-presentation.js'?'0.3.3-card-visuals-icon1':(['services.js','shares.js'].includes(src)?'0.3.3-filesave1':'0.3.3-card-visuals'));
         script.onload=resolve; script.onerror=()=>reject(new Error(`无法加载 ${src}`));
         document.body.append(script);
       });

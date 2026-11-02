@@ -43,6 +43,7 @@ const PortalConfig = (() => {
   function instance(site) {
     if (site?.schemaVersion !== 1 || !text(site.storage?.services) || !text(site.storage?.shares) || site.storage.services === site.storage.shares) fail('实例存储配置无效');
     if (site.canonicalLoopback !== undefined && typeof site.canonicalLoopback !== 'boolean') fail('canonicalLoopback 必须为布尔值');
+    if (site.filePersistence !== undefined && typeof site.filePersistence !== 'boolean') fail('filePersistence 必须为布尔值');
     for (const key of ['serviceCategories','shareCategories']) {
       if (!site[key] || typeof site[key] !== 'object' || Array.isArray(site[key])) fail('实例分类配置无效');
       for (const c of Object.values(site[key])) {

@@ -5,6 +5,7 @@ import base64
 import io
 import plistlib
 import json
+import hashlib
 from pathlib import Path
 import shutil
 import tempfile
@@ -44,6 +45,29 @@ class ServerTests(unittest.TestCase):
             self.assertEqual(self.request('/'+name), (200, (self.root/name).read_bytes()))
         self.assertEqual(self.request('/?space=shares')[0], 200)
         self.assertEqual(self.request('/index.html','HEAD'), (200,b''))
+
+    def test_editable_writes_require_origin_and_revision(self):
+        server = app.make_server(self.root, 0, editable=True)
+        thread = threading.Thread(target=server.serve_forever, daemon=True); thread.start()
+        port=server.server_port
+        def put(name, data, origin, revision):
+            conn=http.client.HTTPConnection('127.0.0.1',port)
+            conn.request('PUT','/'+name,body=data,headers={'Host':f'127.0.0.1:{port}','Origin':origin,'Content-Type':'application/json','X-Portal-Write':'1','If-Match':revision})
+            response=conn.getresponse();response.read();status=response.status;conn.close();return status
+        try:
+            origin=f'http://127.0.0.1:{port}'
+            for name in ('services.json','shares.json'):
+                original=(self.root/name).read_bytes(); revision=hashlib.sha256(original).hexdigest()
+                obj=json.loads(original); obj['testExtension']='preserved'; body=json.dumps(obj).encode()
+                self.assertEqual(put(name,body,'https://example.com',revision),403)
+                self.assertEqual(put(name,body,origin,'stale'),409)
+                self.assertEqual((self.root/name).read_bytes(),original)
+                self.assertEqual(put(name,b'{bad',origin,revision),400)
+                self.assertEqual(put(name,body,origin,revision),204)
+                self.assertEqual(json.loads((self.root/name).read_bytes())['testExtension'],'preserved')
+                self.assertEqual(put(name,body,origin,revision),409)
+        finally:
+            server.shutdown();server.server_close();thread.join()
 
     def test_denies_git_traversal_metadata_and_directory_listing(self):
         for path in ('/.git/HEAD','/.git/config','/.git/logs/HEAD','/%2egit/HEAD','/%2Egit/HEAD',

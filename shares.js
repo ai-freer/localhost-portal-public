@@ -46,8 +46,9 @@
   }
   const validate = PortalConfig.shares;
   async function defaults() { return validate(PortalInstance.shares); }
-  function commit(next) {
+  async function commit(next) {
     const validated = validate(next);
+    await PortalFileStore.save('shares',config,validated);
     localStorage.setItem(SHARE_KEY, JSON.stringify(validated));
     config = validated;
   }
@@ -80,9 +81,9 @@
         catch { toast('复制失败，请通过“打开”访问后复制地址'); }
       };
       card.querySelector('[data-edit]').onclick = () => { card.querySelector('details').open = false; openShareEditor(s); };
-      card.querySelector('[data-delete]').onclick = () => {
+      card.querySelector('[data-delete]').onclick = async () => {
         if (!confirm(`删除「${s.name}」？`)) return;
-        try { commit({...config, shares:config.shares.filter(item => item.id !== s.id)}); renderShares(); toast('已删除链接'); }
+        try { await commit({...config, shares:config.shares.filter(item => item.id !== s.id)}); renderShares(); toast('已删除链接'); }
         catch (error) { toast(error.message); }
       };
       PortalCardMedia.attach(card,s,'shares');
@@ -111,13 +112,13 @@
     $s('#share-categories').innerHTML = config.categories.map(c => `<option value="${esc(c)}"></option>`).join('');
     dialog.showModal(); $s('#share-name').focus();
   }
-  $s('#share-form').onsubmit = event => {
+  $s('#share-form').onsubmit = async event => {
     event.preventDefault();
     const item = {id:editingId || crypto.randomUUID(), name:$s('#share-name').value.trim(), originalName:$s('#share-original').value.trim(), url:$s('#share-url').value.trim(), category:$s('#share-category').value.trim(), date:$s('#share-date').value, aliases:$s('#share-aliases').value.split(/[,，]/).map(s => s.trim()).filter(Boolean)};
     try {
-      commit({...config, shares:editingId ? config.shares.map(s => s.id === editingId ? {...s,...item} : s) : [...config.shares,item]});
+      await commit({...config, shares:editingId ? config.shares.map(s => s.id === editingId ? {...s,...item} : s) : [...config.shares,item]});
       activeCategory = item.category; query = ''; $s('#share-search').value = '';
-      dialog.close(); renderShares(); toast('已保存到本浏览器；请导出分享以备份');
+      dialog.close(); renderShares(); toast(PortalFileStore.enabled ? '已保存到本地配置' : '已保存到本浏览器；请导出分享以备份');
     } catch (error) { toast(error.message); }
   };
   $s('#share-cancel').onclick = () => dialog.close();
@@ -140,12 +141,12 @@
     try {
       const next = validate(JSON.parse(await file.text()));
       if (!confirm(`用导入的 ${next.shares.length} 个分享链接替换当前分享配置？服务导航不受影响。`)) return;
-      commit(next); activeCategory = ALL; query = ''; $s('#share-search').value = ''; renderShares(); toast('分享配置已导入');
+      await commit(next); activeCategory = ALL; query = ''; $s('#share-search').value = ''; renderShares(); toast('分享配置已导入');
     } catch (error) { toast('导入失败：'+error.message); }
   };
   $s('#share-reset').onclick = async () => {
     if (!confirm('重置分享链接为 shares.json 默认配置？分享的本地修改会丢失，服务导航不受影响。')) return;
-    try { commit(await defaults()); activeCategory = ALL; query = ''; $s('#share-search').value = ''; renderShares(); toast('分享配置已重置'); }
+    try { await commit(await defaults()); activeCategory = ALL; query = ''; $s('#share-search').value = ''; renderShares(); toast('分享配置已重置'); }
     catch (error) { toast('重置失败：'+error.message); }
   };
   const unifiedPanel = document.createElement('div');

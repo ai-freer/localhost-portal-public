@@ -7,6 +7,9 @@ import os
 import re
 from pathlib import Path
 import stat
+import hashlib
+import tempfile
+import threading
 from urllib.parse import unquote, urlsplit, urlparse
 import xml.etree.ElementTree as ET
 
@@ -60,8 +63,9 @@ def read_runtime_file(root, name):
     return data
 
 
-def runtime_snapshot(root):
+def runtime_snapshot(root, overrides=None):
     result = {name: read_runtime_file(root, name) for name in RUNTIME_FILES if name not in OPTIONAL_FILES}
+    result.update(overrides or {})
     data = {name: json.loads(result[name]) for name in result if name.endswith('.json')}
     site, services, shares, artwork = (data[n] for n in ('instance.json', 'services.json', 'shares.json', 'artwork.json'))
     if not all(isinstance(value, dict) for value in data.values()):
@@ -103,9 +107,42 @@ def runtime_snapshot(root):
     return result
 
 
-def make_server(root, port):
+def make_server(root, port, editable=False):
     root = Path(root).resolve()
+    write_lock = threading.Lock()
     class Handler(http.server.BaseHTTPRequestHandler):
+        def do_PUT(self):
+            name = urlsplit(self.path).path.lstrip('/')
+            host = self.headers.get('Host', '')
+            expected_host = f'127.0.0.1:{self.server.server_port}'
+            if (not editable or name not in ('services.json', 'shares.json') or host != expected_host
+                or self.headers.get('Origin') != 'http://' + expected_host
+                or self.headers.get('Content-Type') != 'application/json'
+                or self.headers.get('X-Portal-Write') != '1'):
+                self.send_error(403); return
+            try:
+                size = int(self.headers.get('Content-Length', '0'))
+                if not 0 < size <= 1048576: raise ValueError('invalid size')
+                body = self.rfile.read(size)
+                with write_lock:
+                    old = read_runtime_file(root, name)
+                    revision = hashlib.sha256(old).hexdigest()
+                    if self.headers.get('If-Match') != revision:
+                        self.send_error(409); return
+                    runtime_snapshot(root, {name:body})
+                    target = root / name
+                    mode = stat.S_IMODE(target.stat().st_mode)
+                    fd, temporary = tempfile.mkstemp(prefix='.portal-save-', dir=root)
+                    try:
+                        with os.fdopen(fd, 'wb') as f:
+                            f.write(body); f.flush(); os.fsync(f.fileno())
+                        os.chmod(temporary, mode); os.replace(temporary, target)
+                    finally:
+                        if os.path.exists(temporary): os.unlink(temporary)
+                self.send_response(204); self.send_header('Content-Length','0'); self.end_headers()
+            except (OSError, ValueError, TypeError, json.JSONDecodeError, ET.ParseError):
+                self.send_error(400)
+
         def do_GET(self):
             self.respond(False)
 
@@ -126,6 +163,8 @@ def make_server(root, port):
             self.send_header('Content-Type', IMAGE_TYPES.get(Path(name).suffix.lower(), mime + '; charset=utf-8'))
             self.send_header('Content-Length', str(len(body)))
             self.send_header('Cache-Control', 'no-store')
+            if editable and name in ('services.json', 'shares.json'):
+                self.send_header('ETag', hashlib.sha256(body).hexdigest())
             self.send_header('X-Content-Type-Options', 'nosniff')
             self.end_headers()
             if not head:
@@ -138,12 +177,13 @@ def main():
     parser.add_argument('--port', type=int, default=7576)
     parser.add_argument('--bind', choices=['127.0.0.1'], default='127.0.0.1')
     parser.add_argument('--directory', type=Path, default=Path(__file__).resolve().parent)
+    parser.add_argument('--editable', action='store_true', help='允许页面在本机写入服务与分享配置')
     args = parser.parse_args()
     if not 1024 <= args.port <= 65535:
         parser.error('端口范围为 1024–65535')
     try:
         runtime_snapshot(args.directory.resolve())
-        with make_server(args.directory, args.port) as server:
+        with make_server(args.directory, args.port, args.editable) as server:
             print(f'导航已启动：http://127.0.0.1:{args.port}', flush=True)
             server.serve_forever()
     except KeyboardInterrupt:

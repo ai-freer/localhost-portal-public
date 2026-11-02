@@ -121,7 +121,7 @@ function openEditor(s, prefill){
   setTimeout(()=>$('#f-name').focus(), 50);
 }
 
-function saveFromForm(){
+async function saveFromForm(){
   const name = $('#f-name').value.trim();
   const url = $('#f-url').value.trim();
   if(!name || !url){ toast('中文名和 URL 必填'); return; }
@@ -138,27 +138,26 @@ function saveFromForm(){
   };
   try { PortalConfig.services({services:[...services.filter(s=>s.id!==editId), obj]}); }
   catch(error) { toast(error.message); return; }
-  if(editId){
-    const i = services.findIndex(x=>x.id===editId);
-    if(i>=0) services[i] = {...services[i], ...obj};
-  } else {
-    services.push(obj);
-  }
-  persist();
+  const next = editId ? services.map(s=>s.id===editId ? {...s,...obj} : s) : [...services,obj];
+  try { await persist(next); } catch(error) { toast(error.message); return; }
   $('#editor').close();
   render();
-  toast('已保存到本浏览器；请导出配置以备份');
+  toast(PortalFileStore.enabled ? '已保存到本地配置' : '已保存到本浏览器；请导出配置以备份');
 }
 
-function del(s){
+async function del(s){
   if(!confirm('删除「'+s.name+'」？')) return;
-  services = services.filter(x=>x.id!==s.id);
-  persist();
+  try { await persist(services.filter(x=>x.id!==s.id)); } catch(error) { toast(error.message); return; }
   render();
   toast('已删除：'+s.name);
 }
 
-function persist(){ localStorage.setItem(STORE_KEY, JSON.stringify({version: cfgVersion, services})); }
+async function persist(next, version=cfgVersion){
+  const before={version:cfgVersion,services}, updated={version,services:next};
+  await PortalFileStore.save('services',before,updated);
+  localStorage.setItem(STORE_KEY,JSON.stringify(updated));
+  cfgVersion=version; services=next;
+}
 
 function escapeHtml(t){ return String(t).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
@@ -188,16 +187,16 @@ $('#btn-export').onclick = ()=>{
 $('#file-import').onchange = e=>{
   const f = e.target.files[0]; if(!f) return;
   const r = new FileReader();
-  r.onload = ()=>{
-    try{ const j = PortalConfig.services(JSON.parse(r.result)); if(confirm('导入将替换本浏览器的服务配置，是否继续？')){ cfgVersion=j.version||1; services = j.services.map(x=>({...x, id:x.id||('s'+Math.random().toString(36).slice(2,8))})); persist(); render(); toast('已导入 '+services.length+' 个服务'); }
-      else toast('JSON 格式不对'); }
+  r.onload = async ()=>{
+    try{ const j = PortalConfig.services(JSON.parse(r.result)); if(confirm('导入将替换服务配置，是否继续？')){ const next = j.services.map(x=>({...x, id:x.id||('s'+Math.random().toString(36).slice(2,8))})); await persist(next,j.version||1); render(); toast('已导入 '+services.length+' 个服务'); } }
     catch(err){ toast('解析失败：'+err.message); }
   };
   r.readAsText(f);
   e.target.value = '';
 };
-$('#btn-reset').onclick = ()=>{
+$('#btn-reset').onclick = async ()=>{
   if(!confirm('重置为 services.json 的默认配置？本地修改会丢失。')) return;
+  if(PortalFileStore.enabled) { try { await persist(PortalInstance.services.services.map(withDefaults),PortalInstance.services.version || 1); render(); toast('已重置'); } catch(error) { toast(error.message); } return; }
   localStorage.removeItem(STORE_KEY);
   loadServices().then(s=>{ services = s.map(withDefaults); render(); toast('已重置'); });
 };
