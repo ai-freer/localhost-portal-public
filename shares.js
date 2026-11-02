@@ -243,5 +243,15 @@
     else if(params.get('space') === 'shares') switchSpace('shares');
     else if(params.get('space') === 'search') showUnified('', false);
   }
+  window.addEventListener('storage', event=>{
+    if(event.storageArea!==localStorage || event.key!==SHARE_KEY) return;
+    try {
+      config=validate(event.newValue===null ? PortalInstance.shares : JSON.parse(event.newValue));
+      config.shares=config.shares.map(s=>({...s,...(s.artwork ? {} : {artwork:PortalInstance.shares.shares.find(d=>d.id===s.id || d.url===s.url)?.artwork})}));
+      renderShares();
+      if(!unifiedPanel.hidden) renderUnified();
+    } catch { toast('其他标签页的分享配置无法读取，当前列表未更改'); }
+  });
+  window.addEventListener('portal-services-updated',()=>{ if(!unifiedPanel.hidden) renderUnified(); });
   initShares();
 })();

@@ -209,3 +209,13 @@ const servicesReady = (async function init(){
   services = (await loadServices()).map(withDefaults);
   render();
 })();
+window.addEventListener('storage', event=>{
+  if(event.storageArea!==localStorage || event.key!==STORE_KEY) return;
+  try {
+    const data=event.newValue===null ? PortalConfig.services(PortalInstance.services) : PortalConfig.services(JSON.parse(event.newValue));
+    cfgVersion=data.version || 1;
+    services=data.services.map(withDefaults);
+    render();
+    window.dispatchEvent(new Event('portal-services-updated'));
+  } catch { toast('其他标签页的服务配置无法读取，当前列表未更改'); }
+});

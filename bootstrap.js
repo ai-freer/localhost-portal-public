@@ -39,7 +39,7 @@
     document.querySelector('#quick-example').textContent = site.quickExample || '示例';
     for (const src of ['card-media.js','service-presentation.js','visuals.js','services.js','shares.js']) {
       await new Promise((resolve,reject)=>{
-        const script = document.createElement('script'); script.src=src+'?v='+ (src==='service-presentation.js'?'0.3.3-card-visuals-icon1':'0.3.3-card-visuals');
+        const script = document.createElement('script'); script.src=src+'?v='+ (src==='service-presentation.js'?'0.3.3-card-visuals-icon1':(['services.js','shares.js'].includes(src)?'0.3.3-loopback2':'0.3.3-card-visuals'));
         script.onload=resolve; script.onerror=()=>reject(new Error(`无法加载 ${src}`));
         document.body.append(script);
       });
